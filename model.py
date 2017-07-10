@@ -70,7 +70,7 @@ print('validation data size: ', len(validation_samples))
 # print(X_train.dtype, X_train.shape)
 
 
-def generator(samples, batch_size=32):
+def generator(samples, batch_size=32, steer_offset=0.2):
     num_samples = len(samples)
     while 1:  # Loop forever so the generator never terminates
         # shuffle(samples)
@@ -89,10 +89,10 @@ def generator(samples, batch_size=32):
                 angles.append(steering)
                 # left camera
                 images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip()))))
-                angles.append(steering + 0.2)
+                angles.append(steering + steer_offset
                 # right camera
                 images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip()))))
-                angles.append(steering - 0.2)
+                angles.append(steering - steer_offset)
 
             # trim image to only see section with road
             X_train = np.array(images)
