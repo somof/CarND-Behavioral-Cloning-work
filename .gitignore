@@ -13,6 +13,7 @@ models
 /record/
 *.npy
 /linux_sim/
+/mac_sim.app/
 writeup_report.html
 00Rubric.pdf
 examples/placeholder_small.png

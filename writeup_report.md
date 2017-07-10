@@ -1,5 +1,6 @@
 #**Behavioral Cloning Project**
 
+
 [//]: # (Image References)
 [image1]: ./examples/placeholder.png "Model Visualization"
 [image2]: ./examples/placeholder.png "Grayscaling"
@@ -10,6 +11,7 @@
 [image7]: ./examples/placeholder_small.png "Flipped Image"
 
 ---
+
 #1. Files Submitted & Code Quality
 
 ##1.1. Submission includes all required files and can be used to run the simulator in autonomous mode
@@ -42,29 +44,36 @@ The model.py file contains the code for training and saving the convolution neur
 The file shows the pipeline I used for training and validating the model, 
 and it contains comments to explain how the code works.
 
+TODO ここ修正
+
 
 
 #2. Model Architecture and Training Strategy
 
-##2.1 Feasibility Study
+##2.1. Feasibility Study in models architecture
+<!-- ##2.1. Appropriate models architecture has been employed -->
 
-Using given sample driving dataset,
-I had some feasibility study three cameras input architectures as follow.
+Before design a model, I had tests on typical models that were explaned in the lesson of "Behavioral Cloning" as follow.
 
-model.add(Cropping2D(cropping=((70, 20), (0, 0))))
+  1. flat model architecture 
+  2. LeNet model architecture 
+  3. NVIDIA model architecture 
+
+The three models have differences only in their layer structures, and were trained under equal condition as below.
+
+After training, model files written in h5 file by the each models were tested on the driving simulator.
+
+|title|descriptions|
+|:------:|:------
+|dataset | distribution of Udacity
+|camera| left, center, right|
+|crop| cropping=((70, 20), (0, 0))|
+|loss | mse |
+|optimizer  |ADAM
+|epochs| 20|
 
 
-1. flatten architecture
-2. NVIDIA architecture 
-
-They work well at the first part of the track 1
-
-epochs 20
-
-
-<img width=400 src="fig/course_out_02.jpg"/>
-
-
+The way to load multi camera images is as follows:
 
     df = pd.read_csv(args.csvfile, header=0)
     images = []
@@ -80,18 +89,16 @@ epochs 20
     
         # left camera
         images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip()))))
-        measurements.append(steering + 0.5)
+        measurements.append(steering + 0.2)
     
         # right camera
         images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip()))))
-        measurements.append(steering - 0.5)
+        measurements.append(steering - 0.2)
 
     X_train = np.array(images)
     y_train = np.array(measurements)
-    
 
-
-flat model:
+flat model is as follows:
 
     model = Sequential()
     model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
@@ -104,12 +111,34 @@ flat model:
     model.add(Dense(10))
     model.add(Dropout(0.5))
     model.add(Dense(1))
-    
     model.compile(loss='mse', optimizer='adam')
     model.fit(X_train, y_train, validation_split=0.2, shuffle=True)
     model.save('model_flat.h5')
 
-NVIDIA model:
+LeNet model is as follows:
+
+    model = Sequential()
+    model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
+    model.add(Cropping2D(cropping=((70, 20), (0, 0))))
+    model.add(Convolution2D(20, 5, 5, subsample=(1, 1), activation='relu'))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Convolution2D(50, 5, 5, subsample=(1, 1), activation='relu'))
+    model.add(MaxPooling2D((2, 2)))
+    model.add(Dropout(0.25))
+    model.add(Flatten())
+    model.add(Dense(100, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(50, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(10, activation='relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1))
+    model.compile(loss='mse', optimizer='adam')
+    history = model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=20, verbose=2)
+    model.save('model_LeNet.h5')
+
+NVIDIA model is as follows:
 
     model = Sequential()
     model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
@@ -124,14 +153,24 @@ NVIDIA model:
     model.add(Dense(50))
     model.add(Dense(10))
     model.add(Dense(1))
-    
     model.compile(loss='mse', optimizer='adam')
     model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=100)
     model.save('model_NVIDIA.h5')
-    
 
 <img width=400 src="fig/NVIDIA_model.png"/>
 
+
+These studies were almost failed.
+Only NVIDIA model architecture sometimes drives all the track, and other model can not do at all.
+
+In most cases, the vehicle fails to drive over a curb.
+Once it gets away from the center of the road, it doesn't seem to recover itself particularly with uncertain road like below.
+
+<img width=400 src="fig/course_out_02.jpg"/>
+
+
+Following figures show the training curves of the three models.
+NVIDIA model has the least loss value, but also has an obvious overfitting.
 
 <img width=260 src="fig/LossMetrics_flat.png"/>
 <img width=260 src="fig/LossMetrics_LeNet.png"/>
@@ -139,55 +178,26 @@ NVIDIA model:
 
 
 
-the original NVIDIA model can finished the track
-but it 
+##2.2. Attempts to reduce overfitting in the model
+
+I decided to take the NVIDIA model to modify.
+
+To prevent overfitting, I tried two ways to add Dropout layers.
+Some papers said that adding dropout into all layers is effective, but it is not in this case.
+
+<img width=340 src="fig/LossMetrics_NVIDIA2.png"/>
+<img width=340 src="fig/LossMetrics_NVIDIA3.png"/>
 
 
-
-
-##2.1. An appropriate model architecture has been employed
+ここにモデルの詳細説明を追加
 
 My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
 
 The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
 
-
-
-with a center camera in the dataset given Udacity repository
-even NVIDIA network doesn't work well
-
-sometimes run through on the zebra zone and curb
-finaly course out
-
-
-So I trid
-
-- network architecture modification
-  dropout
-
-- multi cameras utilization
-
-
-- dataset augmentation
-
-
-
-
-
-
-##2.2. Attempts to reduce overfitting in the model
-
 The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
 
 The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
-
-
-
-Dropout
-
-
-<img width=340 src="fig/LossMetrics_NVIDIA2.png"/>
-<img width=340 src="fig/LossMetrics_NVIDIA3.png"/>
 
 
 
@@ -202,6 +212,12 @@ The model used an adam optimizer, so the learning rate was not tuned manually (m
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
 
 For details about how I created the training data, see the next section. 
+
+
+いろいろ追加
+data record
+逆走
+沢山追加
 
 
 
@@ -248,6 +264,11 @@ To capture good driving behavior, I first recorded two laps on track one using c
 ひきもどす役割
 
 
+Option trackの追加
+カメラのクロップの確認
+
+
+
 
 ![alt text][image2]
 
@@ -281,19 +302,19 @@ EOF
 
 TODO
 
-* [ ] Use the simulator to collect data of good driving behavior
-* [ ] Build, a convolution neural network in Keras that predicts steering angles from images
-* [ ] Train and validate the model with a training and validation set
-* [ ] model.py モデルを作って、学習する
+* [x] Use the simulator to collect data of good driving behavior
+* [x] Build, a convolution neural network in Keras that predicts steering angles from images
+* [x] Train and validate the model with a training and validation set
+* [x] model.py モデルを作って、学習する
 * [ ] Test that the model successfully drives around track one without leaving the road
 * [ ] model.h5 学習済みCNNを含む* 
-* [ ] drive.py 自動運転をさせる
+* [x] drive.py 自動運転をさせる
 * [ ] Summarize the results with a written report
 
 - The submission includes 
-  - [ ] a model.py file
-  - [ ] drive.py
-  - [ ] model.h5
+  - [x] a model.py file
+  - [x] drive.py
+  - [x] model.h5
   - [ ] a writeup report
   - [ ] video.mp4
 

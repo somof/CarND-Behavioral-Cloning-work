@@ -10,6 +10,7 @@ endif
 
 
 all: 
+	$(PYTHONG) model.py -i data/driving_log.csv -d data
 
 train:
 	$(PYTHONG) model_NVIDIA3.py -i data/driving_log.csv -d data
