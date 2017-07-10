@@ -28,9 +28,11 @@ print('csvfile  : ', args.csvfile)
 print('imagedir : ', args.imgdir)
 
 # center,left,right,steering,throttle,brake,speed
-df = pd.read_csv(args.csvfile, header=0)
+df = pd.read_csv(args.csvfile, skiprows=1)
 
 # 学習用と検証用を別個に作る
+
+sklearn.utils.shuffle(df, replace=False)
 
 from sklearn.model_selection import train_test_split
 train_samples, validation_samples = train_test_split(df, test_size=0.2)
@@ -39,50 +41,58 @@ print('validation data size: ', len(validation_samples))
 
 
 
-images = []
-measurements = []
-for i, dat in df.iterrows():
-    path = os.path.join(args.imgdir, dat[0])
-    # if i % 1000 == 0:
-    #     plt.imshow(Image.open(os.path.join(args.imgdir, dat[0].strip())).crop((0, 70, 320, 120)))
-    #     plt.imshow(Image.open(os.path.join(args.imgdir, dat[1].strip())).crop((0, 70, 320, 120)))
-    #     plt.imshow(Image.open(os.path.join(args.imgdir, dat[2].strip())).crop((0, 70, 320, 120)))
-    #     plt.show()
-    #     plt.imshow(im.crop((0, 70, 320, 120)))
-    #     plt.show()
+# images = []
+# measurements = []
+# for i, dat in df.iterrows():
+#     path = os.path.join(args.imgdir, dat[0])
+#     # if i % 1000 == 0:
+#     #     plt.imshow(Image.open(os.path.join(args.imgdir, dat[0].strip())).crop((0, 70, 320, 120)))
+#     #     plt.imshow(Image.open(os.path.join(args.imgdir, dat[1].strip())).crop((0, 70, 320, 120)))
+#     #     plt.imshow(Image.open(os.path.join(args.imgdir, dat[2].strip())).crop((0, 70, 320, 120)))
+#     #     plt.show()
+#     #     plt.imshow(im.crop((0, 70, 320, 120)))
+#     #     plt.show()
 
-    steering = float(dat[3])
+#     steering = float(dat[3])
 
-    # center camera
-    images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[0].strip()))))
-    measurements.append(steering)
-    # left camera
-    images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip()))))
-    measurements.append(steering + 0.2)
-    # right camera
-    images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip()))))
-    measurements.append(steering - 0.2)
+#     # center camera
+#     images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[0].strip()))))
+#     measurements.append(steering)
+#     # left camera
+#     images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip()))))
+#     measurements.append(steering + 0.2)
+#     # right camera
+#     images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip()))))
+#     measurements.append(steering - 0.2)
 
-X_train = np.array(images)
-y_train = np.array(measurements)
-print(X_train.dtype, X_train.shape)
+# X_train = np.array(images)
+# y_train = np.array(measurements)
+# print(X_train.dtype, X_train.shape)
 
 
 def generator(samples, batch_size=32):
     num_samples = len(samples)
     while 1:  # Loop forever so the generator never terminates
-        shuffle(samples)
+        # shuffle(samples)
+        sklearn.utils.shuffle(samples, replace=False)
         for offset in range(0, num_samples, batch_size):
-            batch_samples = samples[offset:offset+batch_size]
+            # batch_samples = samples[offset:offset+batch_size]
+            batch_samples = samples.ix[:, offset:offset+batch_size]
 
             images = []
             angles = []
-            for batch_sample in batch_samples:
-                name = './IMG/'+batch_sample[0].split('/')[-1]
-                center_image = cv2.imread(name)
-                center_angle = float(batch_sample[3])
-                images.append(center_image)
-                angles.append(center_angle)
+            # for batch_sample in batch_samples:
+            for i, dat in batch_samples.iterrows():
+                steering = float(dat[3])
+                # center camera
+                images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[0].strip()))))
+                angles.append(steering)
+                # left camera
+                images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip()))))
+                angles.append(steering + 0.2)
+                # right camera
+                images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip()))))
+                angles.append(steering - 0.2)
 
             # trim image to only see section with road
             X_train = np.array(images)
