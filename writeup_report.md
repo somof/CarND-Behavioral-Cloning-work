@@ -59,7 +59,7 @@ model.add(Cropping2D(cropping=((70, 20), (0, 0))))
 
 They work well at the first part of the track 1
 
-epochs 10
+epochs 20
 
 
 <img width=400 src="fig/course_out_02.jpg"/>
@@ -133,11 +133,9 @@ NVIDIA model:
 <img width=400 src="fig/NVIDIA_model.png"/>
 
 
-<img width=340 src="fig/LossMetrics_flat.png"/>
-<img width=340 src="fig/LossMetrics_LeNet.png"/>
-<img width=340 src="fig/LossMetrics_NVIDIA.png"/>
-<img width=340 src="fig/LossMetrics_NVIDIA2.png"/>
-<img width=340 src="fig/LossMetrics_NVIDIA3.png"/>
+<img width=260 src="fig/LossMetrics_flat.png"/>
+<img width=260 src="fig/LossMetrics_LeNet.png"/>
+<img width=260 src="fig/LossMetrics_NVIDIA.png"/>
 
 
 
@@ -174,8 +172,6 @@ So I trid
 
 
 
-コースアウトしそうになった時に、リカバリーしない
-ひきもどす役割
 
 
 
@@ -185,6 +181,13 @@ The model contains dropout layers in order to reduce overfitting (model.py lines
 
 The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
+
+
+Dropout
+
+
+<img width=340 src="fig/LossMetrics_NVIDIA2.png"/>
+<img width=340 src="fig/LossMetrics_NVIDIA3.png"/>
 
 
 
@@ -240,6 +243,11 @@ Here is a visualization of the architecture (note: visualizing the architecture 
 ##3.3. Creation of the Training Set & Training Process
 
 To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+
+コースアウトしそうになった時に、リカバリーしない
+ひきもどす役割
+
+
 
 ![alt text][image2]
 
