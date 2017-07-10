@@ -133,11 +133,11 @@ NVIDIA model:
 <img width=400 src="fig/NVIDIA_model.png"/>
 
 
-<img width=300 src="fig/LossMetrics_CNN.png"/>
-<img width=300 src="fig/LossMetrics_flat.png"/>
-<img width=300 src="fig/LossMetrics_NVIDIA3.png"/>
-<img width=300 src="fig/LossMetrics_NVIDIA2.png"/>
-<img width=300 src="fig/LossMetrics_NVIDIA.png"/>
+<img width=340 src="fig/LossMetrics_flat.png"/>
+<img width=340 src="fig/LossMetrics_LeNet.png"/>
+<img width=340 src="fig/LossMetrics_NVIDIA.png"/>
+<img width=340 src="fig/LossMetrics_NVIDIA2.png"/>
+<img width=340 src="fig/LossMetrics_NVIDIA3.png"/>
 
 
 
