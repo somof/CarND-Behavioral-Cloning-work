@@ -7,7 +7,8 @@ import sklearn
 np.random.seed(1337)  # for reproducibility
 
 from keras.models import Sequential
-from keras.layers.core import Dense, Flatten, Dropout
+from keras.layers import Dense, Flatten, Dropout
+# from keras.layers.core import Dense, Flatten, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 from keras.layers import Lambda
@@ -29,10 +30,12 @@ print('imagedir : ', args.imgdir)
 # center,left,right,steering,throttle,brake,speed
 df = pd.read_csv(args.csvfile, header=0)
 
-学習用と検証用を別個に作る
+# 学習用と検証用を別個に作る
 
 from sklearn.model_selection import train_test_split
-train_samples, validation_samples = train_test_split(samples, test_size=0.2)
+train_samples, validation_samples = train_test_split(df, test_size=0.2)
+print('train data size     : ', len(train_samples))
+print('validation data size: ', len(validation_samples))
 
 
 
