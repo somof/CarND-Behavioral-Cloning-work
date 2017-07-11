@@ -53,7 +53,7 @@ and it contains comments to explain how the code works.
 ##2.1. Feasibility Study in models architecture
 <!-- ##2.1. Appropriate models architecture has been employed -->
 
-Before designing a model, I had some tests on typical models explaned in "Behavioral Cloning" lesson as follow.
+Before designing a model, I had some tests on typical models explained in "Behavioral Cloning" lesson as follow.
 
   1. flat model
   2. LeNet model
