@@ -9,7 +9,6 @@ np.random.seed(1337)  # for reproducibility
 
 from keras.models import Sequential
 from keras.layers import Dense, Flatten, Dropout
-# from keras.layers.core import Dense, Flatten, Dropout
 from keras.layers.convolutional import Convolution2D
 from keras.layers.pooling import MaxPooling2D
 from keras.layers import Lambda
@@ -33,9 +32,11 @@ with open(args.csvfile) as csvfile:
     for line in reader:
         samples.append(line)
 
-# shuffle before split dataset
+# shuffle before splitting dataset
 sklearn.utils.shuffle(samples, replace=False)
 
+
+# split dataset for test and validation
 from sklearn.model_selection import train_test_split
 train_samples, validation_samples = train_test_split(samples, test_size=0.2)
 print('train data size     : ', len(train_samples))
@@ -52,7 +53,6 @@ def generator(samples, batch_size=32, steer_offset=0.3):
             images = []
             angles = []
             for dat in batch_samples:
-                # print(dat[3])
                 steering = float(dat[3])
                 # center camera
                 images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[0].strip()))))
@@ -64,15 +64,17 @@ def generator(samples, batch_size=32, steer_offset=0.3):
                 images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip()))))
                 angles.append(steering - steer_offset)
 
-            # trim image to only see section with road
             X_train = np.array(images)
             y_train = np.array(angles)
             yield sklearn.utils.shuffle(X_train, y_train)
+
 
 # compile and train the model using the generator function
 train_generator = generator(train_samples, batch_size=100)
 validation_generator = generator(validation_samples, batch_size=100)
 
+
+# the final model based on NVIDIA model (PolotNet)
 model = Sequential()
 model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
 model.add(Cropping2D(cropping=((70, 20), (0, 0))))
@@ -91,7 +93,10 @@ model.add(Dense(20))
 model.add(Dropout(0.5))
 model.add(Dense(1))
 
+
+# training parameters
 EPOCHS = 60
+EPOCHS = 200
 model.compile(loss='mse', optimizer='adam')
 history = model.fit_generator(train_generator,
                               samples_per_epoch=len(train_samples),
@@ -99,9 +104,12 @@ history = model.fit_generator(train_generator,
                               nb_val_samples=len(validation_samples),
                               nb_epoch=EPOCHS,
                               verbose=2)
+
+# save the model into a file
 model.save('model.h5')
 
 
+# save a training curve
 import matplotlib.pyplot as plt
 
 plt.plot(history.history['loss'])

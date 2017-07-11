@@ -48,8 +48,6 @@ The model.py file contains the code for training and saving the convolution neur
 The file shows the pipeline I used for training and validating the model, 
 and it contains comments to explain how the code works.
 
-TODO ここ修正
-
 
 
 #2. Model Architecture and Training Strategy
@@ -159,7 +157,7 @@ Left and right camera are loaded and used to model training as follow.
 The three models have differences only in their layer structures, described above.
 
 Following figures show the training curves of the three models.
-NVIDIA model is obviously overfitted, but its loss value is the smallest among the models.
+NVIDIA model is obviously overfitted, but its loss value is extremely smaller than other models.
 
 <img width=260 src="fig/LossMetrics_flat.png"/>
 <img width=260 src="fig/LossMetrics_LeNet.png"/>
@@ -170,6 +168,8 @@ NVIDIA model is obviously overfitted, but its loss value is the smallest among t
 ##2.2. Attempts to reduce overfitting in the model
 
 From the result of the feasibility study, I decided to take the NVIDIA model and modify it.
+
+
 
 TODO ここから書く
 
@@ -422,13 +422,13 @@ challeng track
 EOF
 
 
-
-<img width=400 src="fig/LossMetrics_all.png"/>
-<img width=400 src="fig/adding_training_image.jpg"/>
-<img width=400 src="fig/fail_track2_1.jpg"/>
-<img width=400 src="fig/fail_track2_2.jpg"/>
 <img width=400 src="fig/LossMetrics_challenge_1.png"/>
 <img width=400 src="fig/LossMetrics_challenge_2.png"/>
+
+<img width=400 src="fig/LossMetrics_all.png"/>
+<img width=400 src="fig/fail_track2_1.jpg"/>
+<img width=400 src="fig/adding_training_image.jpg"/>
+<!-- <img width=400 src="fig/fail_track2_2.jpg"/> -->
 
 Japanese style
 

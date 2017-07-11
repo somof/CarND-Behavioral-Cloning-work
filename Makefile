@@ -52,10 +52,13 @@ sim:
 	#$(PYTHONC) drive.py model.h5
 	#./linux_sim/linux_sim.x86_64
 
-video:
+record:
 	$(PYTHONG) drive.py model.h5 model_all;
 	#$(PYTHONG) video.py model_all
 	#$(PYTHONG) drive.py model_record_aug.h5 model_record_aug; $(PYTHONG) video.py model_record_aug
 	#$(PYTHONG) drive.py model_NVIDIA_data_1.h5 model_NVIDIA; $(PYTHONG) video.py model_NVIDIA
 	#$(PYTHONG) drive.py model_CNN2_data.h5 model_CNN2
 	#$(PYTHONG) drive.py model_CNN_data.h5 model_CNN
+
+video:
+	$(PYTHONG) video.py model_all
