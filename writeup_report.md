@@ -23,10 +23,7 @@ My project includes the following files:
 * model.py containing the script to create and train the model
 * drive.py for driving the car in autonomous mode
 * model.h5 containing a trained convolution neural network 
-* writeup_report.md or writeup_report.pdf summarizing the results
-
-
-TODO Track2を追加するか、同じモデルで実現するか
+* writeup_report.md and writeup_report.pdf summarizing the results
 
 
 
@@ -39,6 +36,7 @@ the car can be driven autonomously around the track by executing
 python drive.py model.h5
 ```
 
+This model is adapted to both of track 1 and 2.
 
 
 
@@ -193,7 +191,7 @@ Some papers said that adding dropout into all layers is effective, but it is not
 
 To make learning curve smooth, 
 
-ここにモデルの詳細説明を追加
+TODO ここにモデルの詳細説明を追加
 
 dropout
 shrink unit number of Dense layer
@@ -356,6 +354,14 @@ Cropping Three Cameras Images
 
 
 
+|title|descriptions|
+|:------:|:------
+|dataset | collected via Udacity simulator
+|camera| 3 (left, center, right)|
+|crop| cropping=((70, 20), (0, 0))|
+|loss | mse |
+|optimizer  |ADAM
+|epochs| 60|
 
 
 
@@ -416,10 +422,13 @@ I used this training data for training the model. The validation set helped dete
 
 # Challenge Track 2
 
+## training dataset for track 2
 challeng track
 
+12659 data
+  
 
-EOF
+
 
 
 <img width=400 src="fig/LossMetrics_challenge_1.png"/>
@@ -434,8 +443,28 @@ Japanese style
 
 right side
 
+## merge dataset
+
+track1 
+  16404
+track2
+  12659
+
+total
+  29063
 
 
+|title|descriptions|
+|:------:|:------
+|dataset | collected via Udacity simulator
+|camera| 3 (left, center, right)|
+|crop| cropping=((70, 20), (0, 0))|
+|loss | mse |
+|optimizer  |ADAM
+|epochs| 200|
+
+
+EOF
 
 
 # Rubric Points
