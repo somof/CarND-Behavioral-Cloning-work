@@ -421,6 +421,23 @@ challeng track
 
 EOF
 
+
+
+<img width=400 src="fig/LossMetrics_all.png"/>
+<img width=400 src="fig/adding_training_image.jpg"/>
+<img width=400 src="fig/fail_track2_1.jpg"/>
+<img width=400 src="fig/fail_track2_2.jpg"/>
+<img width=400 src="fig/LossMetrics_challenge_1.png"/>
+<img width=400 src="fig/LossMetrics_challenge_2.png"/>
+
+Japanese style
+
+right side
+
+
+
+
+
 # Rubric Points
 
 TODO

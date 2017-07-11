@@ -42,7 +42,7 @@ print('train data size     : ', len(train_samples))
 print('validation data size: ', len(validation_samples))
 
 
-def generator(samples, batch_size=32, steer_offset=0.2):
+def generator(samples, batch_size=32, steer_offset=0.3):
     num_samples = len(samples)
     while 1:  # Loop forever so the generator never terminates
         sklearn.utils.shuffle(samples, replace=False)
@@ -99,7 +99,6 @@ history = model.fit_generator(train_generator,
                               nb_val_samples=len(validation_samples),
                               nb_epoch=EPOCHS,
                               verbose=2)
-
 model.save('model.h5')
 
 
