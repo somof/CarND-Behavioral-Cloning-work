@@ -1,6 +1,7 @@
 #**Behavioral Cloning Project**
 
 
+<!--
 [//]: # (Image References)
 [image1]: ./examples/placeholder.png "Model Visualization"
 [image2]: ./examples/placeholder.png "Grayscaling"
@@ -9,6 +10,7 @@
 [image5]: ./examples/placeholder_small.png "Recovery Image"
 [image6]: ./examples/placeholder_small.png "Normal Image"
 [image7]: ./examples/placeholder_small.png "Flipped Image"
+-->
 
 ---
 
@@ -23,6 +25,8 @@ My project includes the following files:
 * model.h5 containing a trained convolution neural network 
 * writeup_report.md or writeup_report.pdf summarizing the results
 
+
+TODO Track2を追加するか、同じモデルで実現するか
 
 
 
@@ -53,53 +57,15 @@ TODO ここ修正
 ##2.1. Feasibility Study in models architecture
 <!-- ##2.1. Appropriate models architecture has been employed -->
 
-Before design a model, I had tests on typical models that were explaned in the lesson of "Behavioral Cloning" as follow.
+Before designing a model, I had some tests on typical models explaned in "Behavioral Cloning" lesson as follow.
 
-  1. flat model architecture 
-  2. LeNet model architecture 
-  3. NVIDIA model architecture 
+  1. flat model
+  2. LeNet model
+  3. NVIDIA model
 
-The three models have differences only in their layer structures, and were trained under equal condition as below.
+These models are defined as following:
 
-After training, model files written in h5 file by the each models were tested on the driving simulator.
-
-|title|descriptions|
-|:------:|:------
-|dataset | distribution of Udacity
-|camera| left, center, right|
-|crop| cropping=((70, 20), (0, 0))|
-|loss | mse |
-|optimizer  |ADAM
-|epochs| 20|
-
-
-The way to load multi camera images is as follows:
-
-    df = pd.read_csv(args.csvfile, header=0)
-    images = []
-    measurements = []
-    for i, dat in df.iterrows():
-        path = os.path.join(args.imgdir, dat[0])
-        im = Image.open(path)
-        steering = float(dat[3])
-    
-        # center camera
-        images.append(np.asarray(im))
-        measurements.append(steering)
-    
-        # left camera
-        images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip()))))
-        measurements.append(steering + 0.2)
-    
-        # right camera
-        images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip()))))
-        measurements.append(steering - 0.2)
-
-    X_train = np.array(images)
-    y_train = np.array(measurements)
-
-flat model is as follows:
-
+	# flat model
     model = Sequential()
     model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
     model.add(Cropping2D(cropping=((70, 20), (0, 0))))
@@ -111,12 +77,8 @@ flat model is as follows:
     model.add(Dense(10))
     model.add(Dropout(0.5))
     model.add(Dense(1))
-    model.compile(loss='mse', optimizer='adam')
-    model.fit(X_train, y_train, validation_split=0.2, shuffle=True)
-    model.save('model_flat.h5')
 
-LeNet model is as follows:
-
+	# LeNet model
     model = Sequential()
     model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
     model.add(Cropping2D(cropping=((70, 20), (0, 0))))
@@ -134,12 +96,8 @@ LeNet model is as follows:
     model.add(Dense(10, activation='relu'))
     model.add(Dropout(0.5))
     model.add(Dense(1))
-    model.compile(loss='mse', optimizer='adam')
-    history = model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=20, verbose=2)
-    model.save('model_LeNet.h5')
 
-NVIDIA model is as follows:
-
+	# NVIDIA model
     model = Sequential()
     model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
     model.add(Cropping2D(cropping=((70, 20), (0, 0))))
@@ -153,24 +111,55 @@ NVIDIA model is as follows:
     model.add(Dense(50))
     model.add(Dense(10))
     model.add(Dense(1))
+
+
+They were trained under the equal condition and code as below.
+
+|title|descriptions|
+|:------:|:------
+|dataset | distribution of Udacity
+|camera| 3 (left, center, right)|
+|crop| cropping=((70, 20), (0, 0))|
+|loss | mse |
+|optimizer  |ADAM
+|epochs| 20|
+
+	# training code is as follows
     model.compile(loss='mse', optimizer='adam')
-    model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=100)
-    model.save('model_NVIDIA.h5')
-
-<img width=400 src="fig/NVIDIA_model.png"/>
+    history = model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=20, verbose=2)
+    model.save('model.h5')
 
 
-These studies were almost failed.
-Only NVIDIA model architecture sometimes drives all the track, and other model can not do at all.
+Left and right camera are loaded and used to model training as follow.
 
-In most cases, the vehicle fails to drive over a curb.
-Once it gets away from the center of the road, it doesn't seem to recover itself particularly with uncertain road like below.
+    import pandas as pd
+    df = pd.read_csv(args.csvfile, header=0)
+    
+    images = []
+    measurements = []
+    for i, dat in df.iterrows():
+        path = os.path.join(args.imgdir, dat[0])
+    
+        steering = float(dat[3])
+    
+        # center camera
+        images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[0].strip()))))
+        measurements.append(steering)
+        # left camera
+        images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip()))))
+        measurements.append(steering + 0.2)
+        # right camera
+        images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip()))))
+        measurements.append(steering - 0.2)
+    
+    X_train = np.array(images)
+    y_train = np.array(measurements)
 
-<img width=400 src="fig/course_out_02.jpg"/>
 
+The three models have differences only in their layer structures, described above.
 
 Following figures show the training curves of the three models.
-NVIDIA model has the least loss value, but also has an obvious overfitting.
+NVIDIA model is obviously overfitted, but its loss value is the smallest among the models.
 
 <img width=260 src="fig/LossMetrics_flat.png"/>
 <img width=260 src="fig/LossMetrics_LeNet.png"/>
@@ -180,7 +169,20 @@ NVIDIA model has the least loss value, but also has an obvious overfitting.
 
 ##2.2. Attempts to reduce overfitting in the model
 
-I decided to take the NVIDIA model to modify.
+From the result of the feasibility study, I decided to take the NVIDIA model and modify it.
+
+TODO ここから書く
+
+Dropout のテスト
+
+keep feature map layer
+shrink Fully-connected layer(dense layer)
+
+because training signal is only steering, 
+NVIDIA has 10 control signal
+
+
+
 
 To prevent overfitting, I tried two ways to add Dropout layers.
 Some papers said that adding dropout into all layers is effective, but it is not in this case.
@@ -189,7 +191,12 @@ Some papers said that adding dropout into all layers is effective, but it is not
 <img width=340 src="fig/LossMetrics_NVIDIA3.png"/>
 
 
+To make learning curve smooth, 
+
 ここにモデルの詳細説明を追加
+
+dropout
+shrink unit number of Dense layer
 
 My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
 
@@ -201,6 +208,54 @@ The model was trained and validated on different data sets to ensure that the mo
 
 
 
+training curve with provided data
+
+<img width=480 src="fig/LossMetrics_data.png"/>
+
+
+
+for my dataset
+1 lap
+
+this dataset has only 1/4 number of provided dataset yet
+
+This model can drive a track
+but seems to be a bit unstable nn
+
+<img width=480 src="fig/LossMetrics_record.png"/>
+
+
+keep on the road at the problematic corner
+
+
+
+
+
+In most cases, the vehicle fails to drive over a curb.
+Once it gets away from the center of the road, it doesn't seem to recover itself particularly with uncertain road like below.
+
+
+
+One lap training data
+
+
+After training, model files written in h5 file by the each models were tested on the driving simulator.
+
+These studies were almost failed.
+NVIDIA model architecture sometimes drives all the track, and other model can not do at all.
+
+
+<img width=400 src="fig/course_out_02.jpg"/>
+
+
+
+
+
+
+
+
+
+
 ##2.3. Model parameter tuning
 
 The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
@@ -209,15 +264,32 @@ The model used an adam optimizer, so the learning rate was not tuned manually (m
 
 ##2.4. Appropriate training data
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
 
-For details about how I created the training data, see the next section. 
+Then
+augment training data
+increase 
+to 16404 sample (49212 images)
+it is about twice of provided dataset
 
 
 いろいろ追加
 data record
 逆走
 沢山追加
+
+
+
+
+<img width=480 src="fig/LossMetrics_record_aug.png"/>
+
+After augmentation 
+
+<img width=400 src="fig/course_out_03.jpg"/>
+
+
+Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+
+For details about how I created the training data, see the next section. 
 
 
 
@@ -250,7 +322,9 @@ The final model architecture (model.py lines 18-24) consisted of a convolution n
 
 Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
 
-![alt text][image1]
+<!-- ![alt text][image1] -->
+
+<img width=400 src="fig/NVIDIA_model_modify.png"/>
 
 
 
@@ -258,17 +332,60 @@ Here is a visualization of the architecture (note: visualizing the architecture 
 
 ##3.3. Creation of the Training Set & Training Process
 
-To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
+implement generator to have a lot of dataset
 
-コースアウトしそうになった時に、リカバリーしない
-ひきもどす役割
 
+
+
+
+Cropping Three Cameras Images
+
+<img width=700 src="fig/scene_00000.jpg"/>
+<img width=700 src="fig/scene_00700.jpg"/>
+<img width=700 src="fig/scene_01400.jpg"/>
+<img width=700 src="fig/scene_02100.jpg"/>
+<img width=700 src="fig/scene_02800.jpg"/>
+<img width=700 src="fig/scene_03500.jpg"/>
+
+<img width=700 src="fig/crop_00000.jpg"/>
+<img width=700 src="fig/crop_00700.jpg"/>
+<img width=700 src="fig/crop_01400.jpg"/>
+<img width=700 src="fig/crop_02100.jpg"/>
+<img width=700 src="fig/crop_02800.jpg"/>
+<img width=700 src="fig/crop_03500.jpg"/>
+
+
+
+
+
+
+
+I first recorded one laps on track one using center lane driving.
+
+4 lap data
+plus
+reverse 4 lap
+
+ Here is an example image of center lane driving:
+
+To capture good driving behavior, 
+
+
+1時間の検証も問題なく終えた
+脱線することなく
 
 Option trackの追加
 カメラのクロップの確認
 
 
+縁石付近にマニュアルで持っていっても、中央にひきもどす力が働く
 
+コースアウトさせてみると、場所によっては、道路にリカバリーした
+
+
+
+<!--
+To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
 
 ![alt text][image2]
 
@@ -294,6 +411,12 @@ I finally randomly shuffled the data set and put Y% of the data into a validatio
 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
 
+-->
+
+
+# Challenge Track 2
+
+challeng track
 
 
 EOF
@@ -306,7 +429,7 @@ TODO
 * [x] Build, a convolution neural network in Keras that predicts steering angles from images
 * [x] Train and validate the model with a training and validation set
 * [x] model.py モデルを作って、学習する
-* [ ] Test that the model successfully drives around track one without leaving the road
+* [x] Test that the model successfully drives around track one without leaving the road
 * [ ] model.h5 学習済みCNNを含む* 
 * [x] drive.py 自動運転をさせる
 * [ ] Summarize the results with a written report

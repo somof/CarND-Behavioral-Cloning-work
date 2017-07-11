@@ -133,7 +133,10 @@ Save your trained model architecture as model.h5 using model.save('model.h5').
 
 ## Validating Your Network
 
-In order to validate your network, you'll want to compare model performance on the training set and a validation set. The validation set should contain image and steering data that was not used for training. A rule of thumb could be to use 80% of your data for training and 20% for validation or 70% and 30%. Be sure to randomly shuffle the data before splitting into training and validation sets.
+In order to validate your network, you'll want to compare model performance on the training set and a validation set. 
+The validation set should contain image and steering data that was not used for training. 
+A rule of thumb could be to use 80% of your data for training and 20% for validation or 70% and 30%. 
+Be sure to randomly shuffle the data before splitting into training and validation sets.
 
 If model predictions are poor on both the training and validation set (for example, mean squared error is high on both), then this is evidence of underfitting. Possible solutions could be to
 
