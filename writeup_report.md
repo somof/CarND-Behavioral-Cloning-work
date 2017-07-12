@@ -57,7 +57,7 @@ Before designing a model, I had some tests on typical models explained in "Behav
 
   1. flat model
   2. LeNet model
-  3. NVIDIA model
+  3. NVIDIA model (PilotNet)
 
 These models are defined as following:
 
@@ -93,7 +93,7 @@ These models are defined as following:
     model.add(Dropout(0.5))
     model.add(Dense(1))
 
-	# NVIDIA model
+	# NVIDIA model (PilotNet)
     model = Sequential()
     model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
     model.add(Cropping2D(cropping=((70, 20), (0, 0))))
@@ -109,7 +109,7 @@ These models are defined as following:
     model.add(Dense(1))
 
 
-They were trained under the equal condition and code as below.
+The three models are trained under an equal condition implemented via following code.
 
 |title|descriptions|
 |:------:|:------
@@ -126,7 +126,7 @@ They were trained under the equal condition and code as below.
     model.save('model.h5')
 
 
-Left and right camera are loaded and used to model training as follow.
+Left and right camera images are loaded as follow, and used to model training.
 
     import pandas as pd
     df = pd.read_csv(args.csvfile, header=0)
@@ -152,10 +152,8 @@ Left and right camera are loaded and used to model training as follow.
     y_train = np.array(measurements)
 
 
-The three models have differences only in their layer structures, described above.
-
-Following figures show the training curves of the three models.
-NVIDIA model is obviously overfitted, but its loss value is extremely smaller than other models.
+Following figures show training curves of each models.
+PilotNet is obviously overfitted, but its loss value is extremely smaller than other models.
 
 <img width=260 src="fig/LossMetrics_flat.png"/>
 <img width=260 src="fig/LossMetrics_LeNet.png"/>
@@ -165,31 +163,67 @@ NVIDIA model is obviously overfitted, but its loss value is extremely smaller th
 
 ##2.2. Attempts to reduce overfitting in the model
 
-From the result of the feasibility study, I decided to take the NVIDIA model and modify it.
+From the result of the feasibility study, I took PilotNet to apply to the project.
 
+###2.2.1. Adding Dropout Layers
 
+To prevent overfitting, I had a study to estimate place and times of dropout to add into PilotNet.
 
-TODO ここから書く
-
-Dropout のテスト
-
-keep feature map layer
-shrink Fully-connected layer(dense layer)
-
-because training signal is only steering, 
-NVIDIA has 10 control signal
-
-
-
-
-To prevent overfitting, I tried two ways to add Dropout layers.
-Some papers said that adding dropout into all layers is effective, but it is not in this case.
+Following figures show learning cirves of two ways to add Dropout layers.
+Left graph is a case that dropouts are inserted every after FC layers.
+Right graph is a case that dropouts are inserted every after FC layers and CNNs.
 
 <img width=340 src="fig/LossMetrics_NVIDIA2.png"/>
 <img width=340 src="fig/LossMetrics_NVIDIA3.png"/>
 
+Some papers said that adding dropouts into all after layers is effective, but it is not so remarkable in this case.
+But more dropout seems to cause more fluency of training curve.
 
-To make learning curve smooth, 
+
+###2.2.2. Shrinking Scale of PilotNet
+
+This PilotNet implementation seems to be too large for our purpose, 
+relative to the NVIDIA paper "Explaining How a Deep Neural Network Trained with End-to-End Learning Steers a Car".
+
+On the other hand, both of the project and PilotNet have similar input image size,
+the feature map of PilotNet then would work well for the project, too.
+
+So I deceided to shrink the fully-connected layers (dense layers) of the PilotNet to prevent overfitting.
+
+
+
+###2.2.3. Detail of the final model
+
+TODO ここから書く
+
+Following table shows the detail of my final model.
+
+| Layer         		|     Description	        					| 
+|:----------------------|:----------------------------------------------| 
+| Input         		| 160x320x3 RGB image							| 
+| Normalization    		| via lambda x: (x / 255.0) - 0.5				| 
+| Crop           		| 70x320x3 RGB image, offset (0, 70)			| 
+| Convolution 5x5     	| 2x2 stride, outputs 24@33x158					|
+| RELU					|												|
+| Convolution 5x5     	| 2x2 stride, outputs 36@15x77					|
+| RELU					|												|
+| Convolution 5x5     	| 2x2 stride, outputs 48@6x37					|
+| RELU					|												|
+| Dropout				| keep prob. 0.25								|
+| Convolution 3x3     	| 1x1 stride, outputs 64@4x35					|
+| RELU					|												|
+| Dropout				| keep prob. 0.25								|
+| Convolution 3x3     	| 1x1 stride, outputs 64@2x33					|
+| RELU					|												|
+| Dropout				| keep prob. 0.25								|
+| flatten				| 5x5x48 => 2100 								|
+| Fully connected		| outputs 50  									|
+| Dropout				| keep prob. 0.5								|
+| Fully connected		| outputs 50  									|
+| Dropout				| keep prob. 0.5								|
+| Output				| outputs 1  									|
+
+
 
 TODO ここにモデルの詳細説明を追加
 
@@ -205,11 +239,11 @@ The model contains dropout layers in order to reduce overfitting (model.py lines
 The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 
+###2.2.4. Augmentation of Dataset
 
 training curve with provided data
 
 <img width=480 src="fig/LossMetrics_data.png"/>
-
 
 
 for my dataset
@@ -240,10 +274,16 @@ One lap training data
 After training, model files written in h5 file by the each models were tested on the driving simulator.
 
 These studies were almost failed.
-NVIDIA model architecture sometimes drives all the track, and other model can not do at all.
+PilotNet sometimes drives all the track, and other model can not do at all.
 
 
 <img width=400 src="fig/course_out_02.jpg"/>
+
+After augmentation 
+
+<img width=480 src="fig/LossMetrics_record_aug.png"/>
+
+<img width=400 src="fig/course_out_03.jpg"/>
 
 
 
@@ -278,11 +318,6 @@ data record
 
 
 
-<img width=480 src="fig/LossMetrics_record_aug.png"/>
-
-After augmentation 
-
-<img width=400 src="fig/course_out_03.jpg"/>
 
 
 Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
@@ -315,6 +350,9 @@ At the end of the process, the vehicle is able to drive autonomously around the 
 
 
 ##3.2. Final Model Architecture
+
+
+
 
 The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
 

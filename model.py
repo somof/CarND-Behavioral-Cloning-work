@@ -133,9 +133,6 @@ Convolutional feature map
 64@4x35 
 
 Convolutional feature map
-64@6x37 
-
-Convolutional feature map
 48@6x37 
 
 Convolutional feature map
