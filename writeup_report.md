@@ -194,8 +194,6 @@ So I deceided to shrink the fully-connected layers (dense layers) of the PilotNe
 
 ###2.2.3. Detail of the final model
 
-TODO ここから書く
-
 Following table shows the detail of my final model.
 
 | Layer         		|     Description	        					| 
@@ -216,82 +214,66 @@ Following table shows the detail of my final model.
 | Convolution 3x3     	| 1x1 stride, outputs 64@2x33					|
 | RELU					|												|
 | Dropout				| keep prob. 0.25								|
-| flatten				| 5x5x48 => 2100 								|
+| flatten				| 2x44x64 => 5632  								|
 | Fully connected		| outputs 50  									|
 | Dropout				| keep prob. 0.5								|
-| Fully connected		| outputs 50  									|
+| Fully connected		| outputs 20  									|
 | Dropout				| keep prob. 0.5								|
 | Output				| outputs 1  									|
 
 
+My final model consists of five convolution neural networks and two Fully connected networks.
 
-TODO ここにモデルの詳細説明を追加
+The geometry of the CNN layers are really similar to PilotNet, as the table above, 
+therefore its feature maps are expected to work as well as PilotNet. 
 
-dropout
-shrink unit number of Dense layer
 
-My model consists of a convolution neural network with 3x3 filter sizes and depths between 32 and 128 (model.py lines 18-24) 
+I inserted dropout layers after last two CNN layers with keep prob. 0.25,
+and after first two Fully connected layers with keep prob. 0.5.
+These Dropout layers pretty prevented overfitting.
 
-The model includes RELU layers to introduce nonlinearity (code line 20), and the data is normalized in the model using a Keras lambda layer (code line 18). 
+And the size of the two fully connected layers are far shrinked than PilotNet.
+It is also efficient to avoid overfitting.
 
-The model contains dropout layers in order to reduce overfitting (model.py lines 21). 
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting (code line 10-16). The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+The model was trained and validated on different data sets to ensure that the model was not overfitting.
+Both of the dataset shuffled three times via "sklearn.utils.shuffle" function before training.
+
+The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
+
 
 
 ###2.2.4. Augmentation of Dataset
 
-training curve with provided data
+Training curve with provided dataset is as following.
 
 <img width=480 src="fig/LossMetrics_data.png"/>
 
+This trained model drived well around Track 1,
+then I tried to make my own dataset.
 
-for my dataset
-1 lap
 
-this dataset has only 1/4 number of provided dataset yet
-
-This model can drive a track
-but seems to be a bit unstable nn
+Training curve with my first dataset is as following.
 
 <img width=480 src="fig/LossMetrics_record.png"/>
 
+My first dataset consists of images for 1 lap of Track 1, 
+and it has only 1/4 size of the provided dataset yet.
 
-keep on the road at the problematic corner
-
-
-
-
-
-In most cases, the vehicle fails to drive over a curb.
-Once it gets away from the center of the road, it doesn't seem to recover itself particularly with uncertain road like below.
-
-
-
-One lap training data
-
-
-After training, model files written in h5 file by the each models were tested on the driving simulator.
-
-These studies were almost failed.
-PilotNet sometimes drives all the track, and other model can not do at all.
-
+With this trained model,
+the simulated vehicle runs over everytimes at a curve with an uncertain curb showed below.
 
 <img width=400 src="fig/course_out_02.jpg"/>
 
-After augmentation 
+Next, I had forward 4 laps and backword 4 laps to record.
+
+Then training curve became to be as follows.
 
 <img width=480 src="fig/LossMetrics_record_aug.png"/>
 
+Then the final model work well on Track 1 and also keep on the road at the problematic corner.
+
 <img width=400 src="fig/course_out_03.jpg"/>
-
-
-
-
-
-
-
-
 
 
 ##2.3. Model parameter tuning
@@ -301,6 +283,12 @@ The model used an adam optimizer, so the learning rate was not tuned manually (m
 
 
 ##2.4. Appropriate training data
+
+
+
+
+TODO ここから書く
+
 
 
 Then
@@ -377,14 +365,14 @@ implement generator to have a lot of dataset
 Cropping Three Cameras Images
 
 <img width=700 src="fig/scene_00000.jpg"/>
-<img width=700 src="fig/scene_00700.jpg"/>
+<!-- <img width=700 src="fig/scene_00700.jpg"/> -->
 <img width=700 src="fig/scene_01400.jpg"/>
 <img width=700 src="fig/scene_02100.jpg"/>
 <img width=700 src="fig/scene_02800.jpg"/>
 <img width=700 src="fig/scene_03500.jpg"/>
 
 <img width=700 src="fig/crop_00000.jpg"/>
-<img width=700 src="fig/crop_00700.jpg"/>
+<!-- <img width=700 src="fig/crop_00700.jpg"/> -->
 <img width=700 src="fig/crop_01400.jpg"/>
 <img width=700 src="fig/crop_02100.jpg"/>
 <img width=700 src="fig/crop_02800.jpg"/>

@@ -33,7 +33,9 @@ with open(args.csvfile) as csvfile:
         samples.append(line)
 
 # shuffle before splitting dataset
-sklearn.utils.shuffle(samples, replace=False)
+samples = sklearn.utils.shuffle(samples, replace=False, random_state=10)
+samples = sklearn.utils.shuffle(samples, replace=False, random_state=10)
+samples = sklearn.utils.shuffle(samples, replace=False, random_state=10)
 
 
 # split dataset for test and validation
@@ -96,7 +98,7 @@ model.add(Dense(1))
 
 # training parameters
 EPOCHS = 60
-EPOCHS = 200
+EPOCHS = 100
 model.compile(loss='mse', optimizer='adam')
 history = model.fit_generator(train_generator,
                               samples_per_epoch=len(train_samples),
