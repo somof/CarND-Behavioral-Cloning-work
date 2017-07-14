@@ -260,6 +260,9 @@ Training curve with my first dataset is as following.
 My first dataset consists of images for 1 lap of Track 1, 
 and it has only 1/4 size of the provided dataset yet.
 
+Fortunately, 
+this trained model enables to run
+
 With this trained model,
 the simulated vehicle runs over everytimes at a curve with an uncertain curb showed below.
 
@@ -272,8 +275,22 @@ Then training curve became to be as follows.
 <img width=480 src="fig/LossMetrics_record_aug.png"/>
 
 Then the final model work well on Track 1 and also keep on the road at the problematic corner.
+The vehicle ran Track 1 for 1 hour keeping on the road.
 
 <img width=400 src="fig/course_out_03.jpg"/>
+
+
+
+TODO ここから書く
+
+flipped image
+
+Flipping Images And Steering Measurements
+A effective technique for helping with the left turn bias involves flipping images and taking the opposite sign of the steering measurement. For example:
+
+
+
+
 
 
 ##2.3. Model parameter tuning
@@ -283,8 +300,6 @@ The model used an adam optimizer, so the learning rate was not tuned manually (m
 
 
 ##2.4. Appropriate training data
-
-
 
 
 TODO ここから書く
@@ -308,7 +323,8 @@ data record
 
 
 
-Training data was chosen to keep the vehicle driving on the road. I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+Training data was chosen to keep the vehicle driving on the road. 
+I used a combination of center lane driving, recovering from the left and right sides of the road ... 
 
 For details about how I created the training data, see the next section. 
 
@@ -319,6 +335,7 @@ For details about how I created the training data, see the next section.
 
 ##3.1. Solution Design Approach
 
+<!--
 The overall strategy for deriving a model architecture was to ...
 
 My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
@@ -332,7 +349,7 @@ Then I ...
 The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
 
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
-
+-->
 
 
 
@@ -340,11 +357,12 @@ At the end of the process, the vehicle is able to drive autonomously around the 
 ##3.2. Final Model Architecture
 
 
-
+<!--
 
 The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
 
 Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
+-->
 
 <!-- ![alt text][image1] -->
 
@@ -357,9 +375,6 @@ Here is a visualization of the architecture (note: visualizing the architecture 
 ##3.3. Creation of the Training Set & Training Process
 
 implement generator to have a lot of dataset
-
-
-
 
 
 Cropping Three Cameras Images
@@ -391,6 +406,7 @@ Cropping Three Cameras Images
 
 
 
+<img width=400 src="fig/LossMetrics_200.png"/>
 
 I first recorded one laps on track one using center lane driving.
 

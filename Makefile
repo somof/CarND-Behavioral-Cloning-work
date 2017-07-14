@@ -11,8 +11,9 @@ endif
 
 all: 
 	rm -f driving_log_all.csv;
-	cp -f record/driving_log.csv driving_log_all.csv;
+	#cat record/driving_log.csv >> driving_log_all.csv;
 	#cat challenge/driving_log.csv >> driving_log_all.csv;
+	cat record2/driving_log.csv >> driving_log_all.csv;
 	cat challenge2/driving_log.csv >> driving_log_all.csv;
 	$(PYTHONG) model.py -i driving_log_all.csv -d .
 	#$(PYTHONG) model.py -i challenge/driving_log.csv -d challenge
@@ -40,7 +41,8 @@ scene:
 	$(PYTHONC) camera_images.py -i record/driving_log.csv -d record
 
 sim:
-	$(PYTHONG) drive.py model.h5 # track1 & track 2
+	$(PYTHONC) drive.py model_hoken_OK.h5
+	$(PYTHONC) drive.py model.h5 # track1 & track 2
 	#$(PYTHONC) drive.py model_challenge_2.h5 # track 2
 	#$(PYTHONC) drive.py model_record_aug.h5  # model for report
 	#$(PYTHONC) drive.py model_record.h5

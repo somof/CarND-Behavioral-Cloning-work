@@ -66,6 +66,29 @@ def generator(samples, batch_size=32, steer_offset=0.3):
                 images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip()))))
                 angles.append(steering - steer_offset)
 
+                #
+                # flipped images
+                #
+                # center camera
+                images.append(np.fliplr(np.asarray(Image.open(os.path.join(args.imgdir, dat[0].strip())))))
+                angles.append(-steering)
+
+                # -> fail
+                # # left camera
+                # images.append(np.fliplr(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip())))))
+                # angles.append(-steering + steer_offset)
+                # # right camera
+                # images.append(np.fliplr(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip())))))
+                # angles.append(-steering - steer_offset)
+
+                # -> fail
+                # left camera
+                # images.append(np.fliplr(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip())))))
+                # angles.append(-steering + steer_offset)
+                # # right camera
+                # images.append(np.fliplr(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip())))))
+                # angles.append(-steering - steer_offset)
+
             X_train = np.array(images)
             y_train = np.array(angles)
             yield sklearn.utils.shuffle(X_train, y_train)
