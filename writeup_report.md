@@ -1,7 +1,12 @@
-#**Behavioral Cloning Project**
+Behavioral Cloning Project
+==============================
 
 
 <!--
+(setq markdown-command "pandoc -s --self-contained -t html5 -c github.css --toc --toc-depth=4")
+->
+
+
 [//]: # (Image References)
 [image1]: ./examples/placeholder.png "Model Visualization"
 [image2]: ./examples/placeholder.png "Grayscaling"
@@ -14,9 +19,9 @@
 
 ---
 
-#1. Files Submitted & Code Quality
+##1. Files Submitted & Code Quality
 
-##1.1. Submission includes all required files and can be used to run the simulator in autonomous mode
+###1.1. Submission includes all required files and can be used to run the simulator in autonomous mode
 
 My project includes the following files:
 
@@ -24,10 +29,11 @@ My project includes the following files:
 * drive.py for driving the car in autonomous mode
 * model.h5 containing a trained convolution neural network 
 * writeup_report.md and writeup_report.pdf summarizing the results
+* video.mp4 revealing the model is available for track 1 and 2
 
 
 
-##1.2. Submission includes functional code
+###1.2. Submission includes functional code
 
 Using the Udacity provided simulator and my drive.py file, 
 the car can be driven autonomously around the track by executing 
@@ -40,26 +46,30 @@ This model is adapted to both of track 1 and 2.
 
 
 
-##1.3. Submission code is usable and readable
+###1.3. Submission code is usable and readable
 
-The model.py file contains the code for training and saving the convolution neural network.
+The model.py file contains the code for training and saving the convolution neural network.  
 The file shows the pipeline I used for training and validating the model, 
+the generator to save memories when training and validating are executed with huge umber of dataset,
+the graph plot code to output the loss curve of each training and validation,
 and it contains comments to explain how the code works.
 
 
 
-#2. Model Architecture and Training Strategy
+##2. Model Architecture and Training Strategy
 
-##2.1. Feasibility Study in models architecture
+###2.1. Feasibility study in model architectures
 <!-- ##2.1. Appropriate models architecture has been employed -->
 
-Before designing a model, I had some tests on typical models explained in "Behavioral Cloning" lesson as follow.
+Before designing a model, I had tests on typical models explained in "Behavioral Cloning" lesson as follow.
 
   1. flat model
   2. LeNet model
   3. NVIDIA model (PilotNet)
 
 These models are defined as following:
+
+#### Flat model
 
 	# flat model
     model = Sequential()
@@ -74,7 +84,9 @@ These models are defined as following:
     model.add(Dropout(0.5))
     model.add(Dense(1))
 
-	# LeNet model
+#### LeNet model
+
+    # LeNet model
     model = Sequential()
     model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
     model.add(Cropping2D(cropping=((70, 20), (0, 0))))
@@ -93,6 +105,8 @@ These models are defined as following:
     model.add(Dropout(0.5))
     model.add(Dense(1))
 
+#### NVIDIA model (PilotNet)
+
 	# NVIDIA model (PilotNet)
     model = Sequential()
     model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
@@ -109,7 +123,14 @@ These models are defined as following:
     model.add(Dense(1))
 
 
-The three models are trained under an equal condition implemented via following code.
+The three models are trained under the equal condition via following code.
+
+	# training code is as follows
+    model.compile(loss='mse', optimizer='adam')
+    history = model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=20, verbose=2)
+    model.save('model.h5')
+
+Training paramters are as follows.
 
 |title|descriptions|
 |:------:|:------
@@ -118,15 +139,10 @@ The three models are trained under an equal condition implemented via following 
 |crop| cropping=((70, 20), (0, 0))|
 |loss | mse |
 |optimizer  |ADAM
-|epochs| 20|
+|epochs| 60|
 
-	# training code is as follows
-    model.compile(loss='mse', optimizer='adam')
-    history = model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=20, verbose=2)
-    model.save('model.h5')
-
-
-Left and right camera images are loaded as follow, and used to model training.
+All three models adopt multi camera image inputs.  
+Left and right camera images are loaded as follow, and used as training datasets.
 
     import pandas as pd
     df = pd.read_csv(args.csvfile, header=0)
@@ -152,7 +168,7 @@ Left and right camera images are loaded as follow, and used to model training.
     y_train = np.array(measurements)
 
 
-Following figures show training curves of each models.
+Following figures show training curves of each models.  
 PilotNet is obviously overfitted, but its loss value is extremely smaller than other models.
 
 <img width=260 src="fig/LossMetrics_flat.png"/>
@@ -161,38 +177,40 @@ PilotNet is obviously overfitted, but its loss value is extremely smaller than o
 
 
 
-##2.2. Attempts to reduce overfitting in the model
+###2.2. Attempts to reduce overfitting in the model
 
-From the result of the feasibility study, I took PilotNet to apply to the project.
+From the result of the feasibility study, I took PilotNet to apply to the project.  
+Original PilotNet is as below. (my final model is described in the next section)
 
-###2.2.1. Adding Dropout Layers
+<img width=400 src="fig/NVIDIA_model.png"/>
+
+
+#### Adding dropout layers
 
 To prevent overfitting, I had a study to estimate place and times of dropout to add into PilotNet.
 
-Following figures show learning cirves of two ways to add Dropout layers.
-Left graph is a case that dropouts are inserted every after FC layers.
+Following figures show learning cirves of two ways to add Dropout layers.  
+Left graph is a case that dropouts are inserted every after FC layers.  
 Right graph is a case that dropouts are inserted every after FC layers and CNNs.
 
 <img width=340 src="fig/LossMetrics_NVIDIA2.png"/>
 <img width=340 src="fig/LossMetrics_NVIDIA3.png"/>
 
-Some papers said that adding dropouts into all after layers is effective, but it is not so remarkable in this case.
+Some studies said that adding dropouts into all after layers is effective, but it is not so remarkable in this case.
 But more dropout seems to cause more fluency of training curve.
 
 
-###2.2.2. Shrinking Scale of PilotNet
+#### Shrinking PilotNet
 
 This PilotNet implementation seems to be too large for our purpose, 
 relative to the NVIDIA paper "Explaining How a Deep Neural Network Trained with End-to-End Learning Steers a Car".
-
 On the other hand, both of the project and PilotNet have similar input image size,
-the feature map of PilotNet then would work well for the project, too.
-
+the feature map of PilotNet then would work well for the project, too.  
 So I deceided to shrink the fully-connected layers (dense layers) of the PilotNet to prevent overfitting.
 
 
 
-###2.2.3. Detail of the final model
+###2.3. Detail of the final model
 
 Following table shows the detail of my final model.
 
@@ -221,121 +239,230 @@ Following table shows the detail of my final model.
 | Dropout				| keep prob. 0.5								|
 | Output				| outputs 1  									|
 
-
-My final model consists of five convolution neural networks and two Fully connected networks.
-
+My final model consists of five convolution neural networks and two Fully connected networks.  
 The geometry of the CNN layers are really similar to PilotNet, as the table above, 
 therefore its feature maps are expected to work as well as PilotNet. 
 
-
 I inserted dropout layers after last two CNN layers with keep prob. 0.25,
-and after first two Fully connected layers with keep prob. 0.5.
+and after first two Fully connected layers with keep prob. 0.5.  
 These Dropout layers pretty prevented overfitting.
 
-And the size of the two fully connected layers are far shrinked than PilotNet.
+And the size of the two fully connected layers are far shrinked than PilotNet.  
 It is also efficient to avoid overfitting.
 
+Following figure shows my final model.
 
-The model was trained and validated on different data sets to ensure that the model was not overfitting.
-Both of the dataset shuffled three times via "sklearn.utils.shuffle" function before training.
+<img width=400 src="fig/NVIDIA_model_modify.png"/>
+
+The model was trained and validated on different data sets to ensure that the model was not overfitting.  
+Both of the dataset shuffled via "sklearn.utils.shuffle" function before training.
 
 The model was tested by running it through the simulator and ensuring that the vehicle could stay on the track.
 
 
 
-###2.2.4. Augmentation of Dataset
-
-Training curve with provided dataset is as following.
-
-<img width=480 src="fig/LossMetrics_data.png"/>
-
-This trained model drived well around Track 1,
-then I tried to make my own dataset.
 
 
-Training curve with my first dataset is as following.
-
-<img width=480 src="fig/LossMetrics_record.png"/>
-
-My first dataset consists of images for 1 lap of Track 1, 
-and it has only 1/4 size of the provided dataset yet.
-
-Fortunately, 
-this trained model enables to run
-
-With this trained model,
-the simulated vehicle runs over everytimes at a curve with an uncertain curb showed below.
-
-<img width=400 src="fig/course_out_02.jpg"/>
-
-Next, I had forward 4 laps and backword 4 laps to record.
-
-Then training curve became to be as follows.
-
-<img width=480 src="fig/LossMetrics_record_aug.png"/>
-
-Then the final model work well on Track 1 and also keep on the road at the problematic corner.
-The vehicle ran Track 1 for 1 hour keeping on the road.
-
-<img width=400 src="fig/course_out_03.jpg"/>
-
-
-
-TODO ここから書く
-
-flipped image
-
-Flipping Images And Steering Measurements
-A effective technique for helping with the left turn bias involves flipping images and taking the opposite sign of the steering measurement. For example:
-
-
-
-
-
-
-##2.3. Model parameter tuning
+###2.4. Model parameter tuning
 
 The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
 
 
 
-##2.4. Appropriate training data
+###2.5. Appropriate training data
+
+#### Multi cameras use
+
+I had a test beforehand to confirm potentiality of single camera use and multi cameras use.  
+Following scene shows the car can run over at the sharp corner with uncertain curb, if input camera is single.
+
+<img width=400 src="fig/course_out_02.jpg"/>
 
 
-TODO ここから書く
+When the model was trained with multi cameras, the car never run over at the corner and keeps on the road of track 1 at least one hour.
 
-
-
-Then
-augment training data
-increase 
-to 16404 sample (49212 images)
-it is about twice of provided dataset
-
-
-いろいろ追加
-data record
-逆走
-沢山追加
+<img width=400 src="fig/course_out_03.jpg"/>
 
 
 
+Here are the example images input from the three cameras.
+
+TODO left center right が分かる画像を挿入
+
+<img width=700 src="fig/scene_00000.jpg"/>
+<!-- <img width=700 src="fig/scene_00700.jpg"/> -->
+<img width=700 src="fig/scene_01400.jpg"/>
+<img width=700 src="fig/scene_02100.jpg"/>
+<img width=700 src="fig/scene_02800.jpg"/>
+<img width=700 src="fig/scene_03500.jpg"/>
+
+The multi input images are cropped at the first section of the final model like following pictures, 
+although the actual input images are normalized before cropping.
+
+<img width=700 src="fig/crop_00000.jpg"/>
+<!-- <img width=700 src="fig/crop_00700.jpg"/> -->
+<img width=700 src="fig/crop_01400.jpg"/>
+<img width=700 src="fig/crop_02100.jpg"/>
+<img width=700 src="fig/crop_02800.jpg"/>
+<img width=700 src="fig/crop_03500.jpg"/>
+
+In training process,
+left and right images are treated in similar ways with center image
+*expect their steering angle value* .  
+This is same as the method that the lesson showed us.
+And I set steer_offset to 0.3 after some studies.
+(actually this value weren't sensitive.)
+
+	# steer_offset is set to 0.3
+	
+    # center camera
+    images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[0].strip()))))
+    angles.append(steering)
+    # left camera
+    images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip()))))
+    angles.append(steering + steer_offset)
+    # right camera
+    images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip()))))
+    angles.append(steering - steer_offset)
+
+#### Making datasets for each track
+
+Training curve of the provided dataset is as following.  
+The final model works well and drives around track 1 after traininig with the dataset,
+but of course it is not adaptive to track 2.
+
+<img width=480 src="fig/LossMetrics_data.png"/>
+
+
+At first I made two dataset for each track 1 and 2.
+
+Training curve of my datset for track 1 is as following.
+
+<img width=480 src="fig/LossMetrics_record_aug.png"/>
+
+Training curve of my datset for track 2 is as following.
+
+<img width=400 src="fig/LossMetrics_challenge_2.png"/>
+
+The two dataset were enough to train the final model to work for each track.  
+And the car runs around the each track along the center of its road.
+
+At track 2, I tried to make the car keep to the right lane.
+
+
+#### Ensuring the compatibility with both track 1 and track 2
+
+At first I tried simple unification of the two dataset, and it works for track 1 but not for track 2.  
+So, until the model works well for the both two tracks, I augmented training data at every problematic curves.
+
+For example, 
+the car was sometimes caught in poles standing at the edge of the sharp corner as follows.
+
+<img width=400 src="fig/fail_track2_1.jpg"/>
+
+Then I added or replaced training images at the corner by the simulator as follows.
+
+<img width=400 src="fig/adding_training_image.jpg"/>
+<!-- <img width=400 src="fig/fail_track2_2.jpg"/>-->
+
+After many repetitions of such a operation,  I got the final dataset that work well on the both tracks.  
+Therefore the final dataset became very large.
+
+Training curve of the final datset is as following.
+
+<img width=400 src="fig/LossMetrics_all.png"/>
 
 
 
-Training data was chosen to keep the vehicle driving on the road. 
-I used a combination of center lane driving, recovering from the left and right sides of the road ... 
+#### Augmenting dataset via mirrored images
 
-For details about how I created the training data, see the next section. 
+To argment the dataset efficiently, I used mirrored images of center camera via following code.
+
+     # flipped images
+     # center camera
+     images.append(np.fliplr(np.asarray(Image.open(os.path.join(args.imgdir, dat[0].strip())))))
+     angles.append(-steering)
+
+About left and right camera, 
+I could not find a good way to arrange the offset value of the steering angle for their mirror images.  
+So I did not use the both side cameras.
+
+
+#### Generator implementation
+
+I implemented generator to have a lot of dataset as following code.  
+This generator reduce the memory consumption, thus I could train the final model with a huge dataset.
+
+    def generator(samples, batch_size=32, steer_offset=0.3):
+        num_samples = len(samples)
+        while 1:  # Loop forever so the generator never terminates
+            sklearn.utils.shuffle(samples, replace=False)
+            for offset in range(0, num_samples, batch_size):
+                batch_samples = samples[offset:offset+batch_size]
+    
+                images = []
+                angles = []
+                for dat in batch_samples:
+                    steering = float(dat[3])
+                    # center camera
+                    images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[0].strip()))))
+                    angles.append(steering)
+                    # left camera
+                    images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip()))))
+                    angles.append(steering + steer_offset)
+                    # right camera
+                    images.append(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip()))))
+                    angles.append(steering - steer_offset)
+    
+                    #
+                    # flipped images
+                    #
+                    # center camera
+                    images.append(np.fliplr(np.asarray(Image.open(os.path.join(args.imgdir, dat[0].strip())))))
+                    angles.append(-steering)
+    
+                X_train = np.array(images)
+                y_train = np.array(angles)
+                yield sklearn.utils.shuffle(X_train, y_train)
 
 
 
+## Conclusion
 
-#3. Model Architecture and Training Strategy
 
-##3.1. Solution Design Approach
+- designed the model like PilotNet with three cameras
+- made dataset adaptable to both track 1 and track 2
+- run the model and dataset on the simulator, and record it in a video file
 
 <!--
+TODO ここから書く
+
+Lastly,
+I tried the large dataset shrinked, but
+
+### Generalization with Small Dataset for both Track 1 and 2
+
+I tried to reduce training dataset, because the completed dataset above is so large as to need long time to re-train.
+This trial
+-->
+
+<!--
+<img width=400 src="fig/LossMetrics_200.png"/>
+<img width=400 src="fig/LossMetrics_challenge_2.png"/>
+ -->
+
+EOF
+
+
+
+
+
+
+<!--
+#3. Model Architecture and Training Strategy
+
+###3.1. Solution Design Approach
+
 The overall strategy for deriving a model architecture was to ...
 
 My first step was to use a convolution neural network model similar to the ... I thought this model might be appropriate because ...
@@ -349,90 +476,18 @@ Then I ...
 The final step was to run the simulator to see how well the car was driving around track one. There were a few spots where the vehicle fell off the track... to improve the driving behavior in these cases, I ....
 
 At the end of the process, the vehicle is able to drive autonomously around the track without leaving the road.
--->
 
 
-
-
-##3.2. Final Model Architecture
-
-
-<!--
+###3.2. Final Model Architecture
 
 The final model architecture (model.py lines 18-24) consisted of a convolution neural network with the following layers and layer sizes ...
 
 Here is a visualization of the architecture (note: visualizing the architecture is optional according to the project rubric)
--->
 
-<!-- ![alt text][image1] -->
-
-<img width=400 src="fig/NVIDIA_model_modify.png"/>
+![alt text][image1]
 
 
 
-
-
-##3.3. Creation of the Training Set & Training Process
-
-implement generator to have a lot of dataset
-
-
-Cropping Three Cameras Images
-
-<img width=700 src="fig/scene_00000.jpg"/>
-<!-- <img width=700 src="fig/scene_00700.jpg"/> -->
-<img width=700 src="fig/scene_01400.jpg"/>
-<img width=700 src="fig/scene_02100.jpg"/>
-<img width=700 src="fig/scene_02800.jpg"/>
-<img width=700 src="fig/scene_03500.jpg"/>
-
-<img width=700 src="fig/crop_00000.jpg"/>
-<!-- <img width=700 src="fig/crop_00700.jpg"/> -->
-<img width=700 src="fig/crop_01400.jpg"/>
-<img width=700 src="fig/crop_02100.jpg"/>
-<img width=700 src="fig/crop_02800.jpg"/>
-<img width=700 src="fig/crop_03500.jpg"/>
-
-
-
-|title|descriptions|
-|:------:|:------
-|dataset | collected via Udacity simulator
-|camera| 3 (left, center, right)|
-|crop| cropping=((70, 20), (0, 0))|
-|loss | mse |
-|optimizer  |ADAM
-|epochs| 60|
-
-
-
-<img width=400 src="fig/LossMetrics_200.png"/>
-
-I first recorded one laps on track one using center lane driving.
-
-4 lap data
-plus
-reverse 4 lap
-
- Here is an example image of center lane driving:
-
-To capture good driving behavior, 
-
-
-1時間の検証も問題なく終えた
-脱線することなく
-
-Option trackの追加
-カメラのクロップの確認
-
-
-縁石付近にマニュアルで持っていっても、中央にひきもどす力が働く
-
-コースアウトさせてみると、場所によっては、道路にリカバリーした
-
-
-
-<!--
 To capture good driving behavior, I first recorded two laps on track one using center lane driving. Here is an example image of center lane driving:
 
 ![alt text][image2]
@@ -459,57 +514,9 @@ I finally randomly shuffled the data set and put Y% of the data into a validatio
 
 I used this training data for training the model. The validation set helped determine if the model was over or under fitting. The ideal number of epochs was Z as evidenced by ... I used an adam optimizer so that manually training the learning rate wasn't necessary.
 
--->
 
 
-# Challenge Track 2
-
-## training dataset for track 2
-challeng track
-
-12659 data
-  
-
-
-
-
-<img width=400 src="fig/LossMetrics_challenge_1.png"/>
-<img width=400 src="fig/LossMetrics_challenge_2.png"/>
-
-<img width=400 src="fig/LossMetrics_all.png"/>
-<img width=400 src="fig/fail_track2_1.jpg"/>
-<img width=400 src="fig/adding_training_image.jpg"/>
-<!-- <img width=400 src="fig/fail_track2_2.jpg"/> -->
-
-Japanese style
-
-right side
-
-## merge dataset
-
-track1 
-  16404
-track2
-  12659
-
-total
-  29063
-
-
-|title|descriptions|
-|:------:|:------
-|dataset | collected via Udacity simulator
-|camera| 3 (left, center, right)|
-|crop| cropping=((70, 20), (0, 0))|
-|loss | mse |
-|optimizer  |ADAM
-|epochs| 200|
-
-
-EOF
-
-
-# Rubric Points
+## Rubric Points
 
 TODO
 
@@ -588,3 +595,5 @@ Suggestions to Make Your Project Stand Out!
     To meet specifications, the car must successfully drive around track one. 
     Track two is more difficult. 
     See if you can get the car to stay on the road for track two as well.
+
+-->
