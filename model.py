@@ -32,7 +32,7 @@ with open(args.csvfile) as csvfile:
     for line in reader:
         samples.append(line)
 
-# shuffle before splitting dataset
+# shuffle before splitting dataset three times to make sure
 samples = sklearn.utils.shuffle(samples, replace=False, random_state=10)
 samples = sklearn.utils.shuffle(samples, replace=False, random_state=10)
 samples = sklearn.utils.shuffle(samples, replace=False, random_state=10)
@@ -45,6 +45,7 @@ print('train data size     : ', len(train_samples))
 print('validation data size: ', len(validation_samples))
 
 
+# reduction of the huge memory consumption in training process with large dataset
 def generator(samples, batch_size=32, steer_offset=0.3):
     num_samples = len(samples)
     while 1:  # Loop forever so the generator never terminates
@@ -67,13 +68,13 @@ def generator(samples, batch_size=32, steer_offset=0.3):
                 angles.append(steering - steer_offset)
 
                 #
-                # flipped images
+                # Augmentation via flipped images
                 #
                 # center camera
                 images.append(np.fliplr(np.asarray(Image.open(os.path.join(args.imgdir, dat[0].strip())))))
                 angles.append(-steering)
 
-                # -> fail
+                # -> fail to use
                 # # left camera
                 # images.append(np.fliplr(np.asarray(Image.open(os.path.join(args.imgdir, dat[2].strip())))))
                 # angles.append(-steering + steer_offset)
@@ -81,7 +82,7 @@ def generator(samples, batch_size=32, steer_offset=0.3):
                 # images.append(np.fliplr(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip())))))
                 # angles.append(-steering - steer_offset)
 
-                # -> fail
+                # -> fail to use
                 # left camera
                 # images.append(np.fliplr(np.asarray(Image.open(os.path.join(args.imgdir, dat[1].strip())))))
                 # angles.append(-steering + steer_offset)
@@ -99,7 +100,14 @@ train_generator = generator(train_samples, batch_size=100)
 validation_generator = generator(validation_samples, batch_size=100)
 
 
-# the final model based on NVIDIA model (PolotNet)
+# the final model based on PolotNet
+# Input: camera image           160x320 RGB
+# Convolutional feature map     24@33x158
+# Convolutional feature map     36@15x77
+# Convolutional feature map     48@6x37 
+# Convolutional feature map     64@4x35 
+# Convolutional feature map     64@2x33 
+# Output: steering angle value  1
 model = Sequential()
 model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160, 320, 3)))
 model.add(Cropping2D(cropping=((70, 20), (0, 0))))
@@ -134,7 +142,7 @@ history = model.fit_generator(train_generator,
 model.save('model.h5')
 
 
-# save a training curve
+# save a training curve graph
 import matplotlib.pyplot as plt
 
 plt.plot(history.history['loss'])
@@ -147,22 +155,3 @@ plt.xticks(np.arange(0, EPOCHS, 4))
 plt.legend(['training set', 'validation set'], loc='upper right')
 plt.savefig('fig/LossMetrics.png')
 # plt.show()
-
-"""
-Output: steering
-
-Convolutional feature map
-64@2x33 
-
-Convolutional feature map
-64@4x35 
-
-Convolutional feature map
-48@6x37 
-
-Convolutional feature map
-36@15x77
-
-Convolutional feature map
-24@33x158
-"""

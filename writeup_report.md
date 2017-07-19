@@ -26,9 +26,9 @@ Behavioral Cloning Project
 My project includes the following files:
 
 * model.py containing the script to create and train the model
-* drive.py for driving the car in autonomous mode
+* drive.py for driving the car in autonomous mode. it's a just resubmit the original drive.py
 * model.h5 containing a trained convolution neural network 
-* writeup_report.md and writeup_report.pdf summarizing the results
+* writeup_report.md and writeup_report.html summarizing the results
 * video.mp4 revealing the model is available for track 1 and 2
 
 
@@ -36,14 +36,11 @@ My project includes the following files:
 ###1.2. Submission includes functional code
 
 Using the Udacity provided simulator and my drive.py file, 
-the car can be driven autonomously around the track by executing 
+the car can be driven autonomously around both track 1 and 2 by executing 
 
 ```sh
 python drive.py model.h5
 ```
-
-This model is adapted to both of track 1 and 2.
-
 
 
 ###1.3. Submission code is usable and readable
@@ -123,14 +120,13 @@ These models are defined as following:
     model.add(Dense(1))
 
 
-The three models are trained under the equal condition via following code.
+These three models are trained under the equal condition via following code and parameters.
 
 	# training code is as follows
     model.compile(loss='mse', optimizer='adam')
     history = model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=20, verbose=2)
     model.save('model.h5')
 
-Training paramters are as follows.
 
 |title|descriptions|
 |:------:|:------
@@ -141,8 +137,8 @@ Training paramters are as follows.
 |optimizer  |ADAM
 |epochs| 60|
 
-All three models adopt multi camera image inputs.  
-Left and right camera images are loaded as follow, and used as training datasets.
+All three models adopt multi camera inputs solution.  
+Left and right camera images are loaded, and used as training datasets  as following code.
 
     import pandas as pd
     df = pd.read_csv(args.csvfile, header=0)
@@ -179,7 +175,7 @@ PilotNet is obviously overfitted, but its loss value is extremely smaller than o
 
 ###2.2. Attempts to reduce overfitting in the model
 
-From the result of the feasibility study, I took PilotNet to apply to the project.  
+From the result of the feasibility study, I took PilotNet to apply into my project.  
 Original PilotNet is as below. (my final model is described in the next section)
 
 <img width=400 src="fig/NVIDIA_model.png"/>
@@ -187,26 +183,28 @@ Original PilotNet is as below. (my final model is described in the next section)
 
 #### Adding dropout layers
 
-To prevent overfitting, I had a study to estimate place and times of dropout to add into PilotNet.
+To prevent overfitting, I had a study to estimate how dropout should be added into the model.
 
-Following figures show learning cirves of two ways to add Dropout layers.  
+Following figures show learning curves of two ways adding Dropout layers.  
 Left graph is a case that dropouts are inserted every after FC layers.  
 Right graph is a case that dropouts are inserted every after FC layers and CNNs.
 
 <img width=340 src="fig/LossMetrics_NVIDIA2.png"/>
 <img width=340 src="fig/LossMetrics_NVIDIA3.png"/>
 
-Some studies said that adding dropouts into all after layers is effective, but it is not so remarkable in this case.
-But more dropout seems to cause more fluency of training curve.
+Some other studies said that adding dropouts into all after layers is effective.
+It is not so remarkable in this case, but I took 5 dropout model because more dropouts caused more fluency of training curve.
 
 
 #### Shrinking PilotNet
 
 This PilotNet implementation seems to be too large for our purpose, 
 relative to the NVIDIA paper "Explaining How a Deep Neural Network Trained with End-to-End Learning Steers a Car".
+
 On the other hand, both of the project and PilotNet have similar input image size,
-the feature map of PilotNet then would work well for the project, too.  
-So I deceided to shrink the fully-connected layers (dense layers) of the PilotNet to prevent overfitting.
+therefore the feature map of the model would work as well as PilotNet.
+
+So I deceided to shrink only the fully-connected layers (dense layers) of the PilotNet to prevent overfitting.
 
 
 
@@ -265,7 +263,7 @@ The model was tested by running it through the simulator and ensuring that the v
 
 ###2.4. Model parameter tuning
 
-The model used an adam optimizer, so the learning rate was not tuned manually (model.py line 25).
+The model used an adam optimizer, so the learning rate was not tuned manually.
 
 
 
@@ -273,13 +271,15 @@ The model used an adam optimizer, so the learning rate was not tuned manually (m
 
 #### Multi cameras use
 
-I had a test beforehand to confirm potentiality of single camera use and multi cameras use.  
-Following scene shows the car can run over at the sharp corner with uncertain curb, if input camera is single.
+I had a test beforehand to confirm potentialities of single camera use and multi cameras use.  
+Following scene shows the car can run over at the sharp corner with uncertain curb, 
+if input camera is single.
 
 <img width=400 src="fig/course_out_02.jpg"/>
 
 
-When the model was trained with multi cameras, the car never run over at the corner and keeps on the road of track 1 at least one hour.
+When the model was trained with multi cameras, 
+the car never run over at the corner and keeps on the road of track 1 at least one hour.
 
 <img width=400 src="fig/course_out_03.jpg"/>
 
@@ -304,11 +304,10 @@ although the actual input images are normalized before cropping.
 <img width=700 src="fig/crop_02800.jpg"/>
 <img width=700 src="fig/crop_03500.jpg"/>
 
-In training process,
+In the training process,
 left and right images are treated in similar ways with center image
-*expect their steering angle value* .  
-This is same as the method that the lesson showed us.
-And I set steer_offset to 0.3 after some studies.
+*expect their steering angle values* .  
+It is a same method as the lesson showed us, but I set steer_offset to 0.3 after some studies.
 (actually this value weren't sensitive.)
 
 	# steer_offset is set to 0.3
@@ -389,7 +388,7 @@ So I did not use the both side cameras.
 #### Generator implementation
 
 I implemented generator to have a lot of dataset as following code.  
-This generator reduce the memory consumption, thus I could train the final model with a huge dataset.
+I could train the final model with a huge dataset, thus the generator reduced the memory consumption.
 
     def generator(samples, batch_size=32, steer_offset=0.3):
         num_samples = len(samples)
