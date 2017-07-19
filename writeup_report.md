@@ -287,9 +287,7 @@ When the model was trained with multi cameras, the car never run over at the cor
 
 Here are the example images input from the three cameras.
 
-TODO left center right が分かる画像を挿入
-
-<img width=700 src="fig/scene_00000.jpg"/>
+<img width=700 src="fig/scene_00000_2.jpg"/>
 <!-- <img width=700 src="fig/scene_00700.jpg"/> -->
 <img width=700 src="fig/scene_01400.jpg"/>
 <img width=700 src="fig/scene_02100.jpg"/>
@@ -299,7 +297,7 @@ TODO left center right が分かる画像を挿入
 The multi input images are cropped at the first section of the final model like following pictures, 
 although the actual input images are normalized before cropping.
 
-<img width=700 src="fig/crop_00000.jpg"/>
+<img width=700 src="fig/crop_00000_2.jpg"/>
 <!-- <img width=700 src="fig/crop_00700.jpg"/> -->
 <img width=700 src="fig/crop_01400.jpg"/>
 <img width=700 src="fig/crop_02100.jpg"/>
