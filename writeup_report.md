@@ -426,10 +426,14 @@ I could train the final model with a huge dataset, thus the generator reduced th
 
 ## Conclusion
 
+PilotNet developed by NVIDIA was quite effective to end-to-end-learning.
 
-- designed the model like PilotNet with three cameras
-- made dataset adaptable to both track 1 and track 2
-- run the model and dataset on the simulator, and record it in a video file
+I designed my CNN model by means of shrinking PilotNet and adding dropout layers in it.
+And the model was strengthened by three camera input.
+
+Then I made dataset for the model to drive around both track 1 and 2.
+Though The dataset became far larger than twice of the provided dataset, I could complete it.
+
 
 <!--
 TODO ここから書く
